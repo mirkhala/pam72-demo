@@ -1,0 +1,55 @@
+package com.myspace.demo_bancolombia;
+
+
+import com.myspace.demo_bancolombia.Transaccion;
+
+
+rule "All OK" 
+ruleflow-group 'reglasBancolombia'
+when     
+    $t: Transaccion( existeCuenta == true, existeLog == true, isEqualValues()) 
+then
+    System.out.println("Evaluando regla All OK");
+    modify($t){
+        setResultRules("ALL_OK");
+    } 
+    System.out.println("Finaliza evaluacion regla All OK");
+end  
+
+rule "Gabetas OK" 
+ruleflow-group 'reglasBancolombia'
+when     
+    $t: Transaccion( existeCuenta == false, existeLog == true) 
+then
+    System.out.println("Evaluando regla Gabetas OK");
+    modify($t){
+        setResultRules("NO_EXISTE_CUENTA");
+    }
+    $t.setDiffValues();
+    System.out.println("Finaliza evaluacion regla Gabetas OK");
+end  
+
+rule "Gabetas modified"
+ruleflow-group 'reglasBancolombia'
+when     
+    $t: Transaccion( existeCuenta == true, existeLog == true, isEqualValues() == false ) 
+then
+    System.out.println("Evaluando regla Gabetas modified");
+    modify($t){         
+        setResultRules("VALOR_NO_COINCIDE");
+    }
+    $t.setDiffValues();
+    System.out.println("Finaliza evaluacion regla Gabetas modified");
+end
+
+rule "Tx No Existe" 
+ruleflow-group 'reglasBancolombia'
+when     
+    $t: Transaccion( existeCuenta == false, existeLog == false) 
+then
+    System.out.println("Evaluando regla Tx no existe");
+    modify($t){
+        setResultRules("NO_EXISTE");
+    }
+    System.out.println("Finaliza evaluacion regla Tx no existe");
+end  
